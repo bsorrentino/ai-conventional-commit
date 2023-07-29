@@ -50,8 +50,7 @@ async function conventionalCommit(inputText, file) {
     // The placeholder #~commit_message~# will be replaced with the actual commit message later
     const prompt = PromptTemplate.fromTemplate(`
     translate text provided by developer using conventional commit format following rules below
-    * by default no scope is provided
-    * if text contains a file add it as scope of the commit
+    * if contains a file then file name is used as scope otherwise no scope is provided 
     * for each period add a newline into commit.
     * if user put suffix "as <text>" the <text> must considered the commit's topic
     * answer must contain only the commit text
@@ -64,6 +63,8 @@ async function conventionalCommit(inputText, file) {
       prompt,
       outputKey: "text", // For readability - otherwise the chain output will default to a property named "text"
     });
+
+    // console.debug( file )
 
     // Generate the commit message template with the placeholder
     const result = await getCommitText.call({
@@ -87,7 +88,9 @@ async function conventionalCommit(inputText, file) {
  */
 const getFilesUpdated = async () => {
 
-  const result = await $`git diff HEAD  --name-only`
+  // const result = await $`git diff HEAD  --name-only`
+  const result = await $`git diff --name-only --cached`
+  
   return result.stdout
             .split('\n')
             .map( file => file.trimEnd() )
@@ -105,7 +108,7 @@ const main = async () => {
 
   const result = await getFilesUpdated()
 
-  const file = ( result && result.length === 1 ) ? `concern file ${result[0]}, `:  undefined;
+  const file = ( result && result.length === 1 ) ? `concerning file ${result[0]} `:  undefined;
 
   const commitMessage = await conventionalCommit(inputText, file );
 
