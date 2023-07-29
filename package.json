@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "langchain": "^0.0.119",
+    "node-clipboardy": "^1.0.3",
     "openai": "^3.3.0",
     "zx": "^7.2.3"
   }

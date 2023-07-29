@@ -1,6 +1,8 @@
 import { OpenAI } from "langchain/llms/openai";
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
+import clipboard from 'node-clipboardy';
+
 import 'zx/globals'
 
 /**
@@ -48,7 +50,8 @@ async function conventionalCommit(inputText, file) {
     // The placeholder #~commit_message~# will be replaced with the actual commit message later
     const prompt = PromptTemplate.fromTemplate(`
     translate text provided by developer using conventional commit format following rules below
-    * if text contains a file, add it as scope of the commit
+    * by default no scope is provided
+    * if text contains a file add it as scope of the commit
     * for each period add a newline into commit.
     * if user put suffix "as <text>" the <text> must considered the commit's topic
     * answer must contain only the commit text
@@ -102,17 +105,14 @@ const main = async () => {
 
   const result = await getFilesUpdated()
 
-  if( result && result.length === 1 ) {
+  const file = ( result && result.length === 1 ) ? `concern file ${result[0]}, `:  undefined;
 
-    const commitMessage = await conventionalCommit(inputText, `concern file ${result[0]}, ` );
+  const commitMessage = await conventionalCommit(inputText, file );
 
-    return commitMessage;
-  
-  }
-
-  const commitMessage = await conventionalCommit(inputText);
+  await clipboard.write( commitMessage )
 
   return commitMessage;
+  
 
 }
 
