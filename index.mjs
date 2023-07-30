@@ -59,12 +59,16 @@ async function conventionalCommit(inputText, file) {
     as developer: {file}{inputText}  
   `);
 
+
   const promptVars = {
     inputText: inputText,
     file: file ?? "" 
   }
 
-  console.debug( await prompt.format( promptVars ) );
+  if( argv.showPrompt ) {
+    const p = await prompt.format( promptVars )
+    console.log( chalk.blueBright(p) );
+  }
 
     const getCommitText = new LLMChain({
       llm: model(),
