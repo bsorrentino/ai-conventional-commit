@@ -149,6 +149,13 @@ const getCommitInfo = async () => {
 
 }
 
+/**
+ * Commits files to git with the given commit message.
+ * 
+ * @param {string} commitMessage - The commit message to use.
+ * @param {string[]} files - Array of file paths to commit.
+ * @returns {Promise} - A promise that resolves when commit is complete.
+ */
 const commitFiles = async (commitMessage, files) => {
 
   let args = [
@@ -168,6 +175,17 @@ const commitFiles = async (commitMessage, files) => {
 
 }
 
+/**
+ * The main function that generates and commits a conventional commit message.
+ * 
+ * 1. Validates input text is provided.
+ * 2. Gets commit info from getCommitInfo(). 
+ * 3. Generates commit message from input text using conventionalCommit().
+ * 4. Writes commit message to clipboard.
+ * 5. Commits files if a commit is requested, otherwise logs commit message.
+ * 
+ * @returns {Promise<void>} A promise that resolves when done.
+ */
 const main = async () => { 
 
   // console.debug( argv );
