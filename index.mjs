@@ -180,9 +180,12 @@ const main = async () => {
 
   const { commit:isCommit, files:filesToCommit }  = await getCommitInfo()
 
-  if( isCommit && filesToCommit.length === 0 ) {
+  if( filesToCommit.length === 0 ) {
+    
     console.warn(chalk.yellow('no file to commit!')); 
-    return
+    if( isCommit ) {
+      return
+    }
   }
 
   const promptExt = ( file ) => `concerning file ${path.basename(file)} `
