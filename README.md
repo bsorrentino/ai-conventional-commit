@@ -5,7 +5,7 @@ This simple utility make a commit description compliant witn [conventional commi
 
 ### Features
 
-* If update concerns one file **it is put automatically as scope of commit** 
+* If update concerns **one staging file** or such file is provided by command line using `-c` argument, **it is put automatically as scope of commit** 
 * Period is translated as new line in result message
 * use postfix `as <the_topic_name>` to define commit topic
 * use postfix `scope <the_scope_name>` to define commit scope. 
@@ -13,6 +13,8 @@ This simple utility make a commit description compliant witn [conventional commi
 
 ### Examples
 
-| text | result
- --- | ---
-| `add password hashing as auth` | `feat(auth): add password hashing`
+| text | result | staging file (-c argument)
+ --- | --- | ---
+| `add password hashing as auth` | `feat(auth): add password hashing` |
+| `update README.md`| `docs: update readme.md` | 
+| `update`| `docs(README.md): update` |README.md|
