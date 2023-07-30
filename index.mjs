@@ -24,7 +24,8 @@ const model = () => {
       // modelName: "text-davinci-003", // Defaults to "text-davinci-003" if no model provided.
       modelName: "gpt-3.5-turbo",
       temperature: 0,
-      maxTokens: 500
+      maxTokens: 500,
+      maxRetries: 2
     });
 
   }
@@ -50,13 +51,20 @@ async function conventionalCommit(inputText, file) {
     // The placeholder #~commit_message~# will be replaced with the actual commit message later
     const prompt = PromptTemplate.fromTemplate(`
     translate text provided by developer using conventional commit format following rules below
-    * if contains a file then file name is used as scope otherwise no scope is provided 
+    * if contains a file name use it as scope otherwise no scope is provided 
     * for each period add a newline into commit.
     * if user put suffix "as <text>" the <text> must considered the commit's topic
     * answer must contain only the commit text
     
-    as developer: {file} {inputText}  
+    as developer: {file}{inputText}  
   `);
+
+  const promptVars = {
+    inputText: inputText,
+    file: file ?? "" 
+  }
+
+  console.debug( await prompt.format( promptVars ) );
 
     const getCommitText = new LLMChain({
       llm: model(),
@@ -67,10 +75,7 @@ async function conventionalCommit(inputText, file) {
     // console.debug( file )
 
     // Generate the commit message template with the placeholder
-    const result = await getCommitText.call({
-      inputText: inputText,
-      file: file ?? ""
-    });
+    const result = await getCommitText.call(promptVars);
 
     return result.text;
   } catch (error) {
@@ -150,9 +155,12 @@ const commitFiles = async (commitMessage, files) => {
     args.push( files[0] )
   }
 
-  // console.debug( `git commit ${args}`)
-
-  await $`git commit ${args}`
+  if( argv.dryrun ) {
+    console.log( `git commit ${args.join(' ')}`)
+  }
+  else {
+    await $`git commit ${args}`
+  }
 
 }
 
@@ -173,7 +181,7 @@ const main = async () => {
     return
   }
 
-  const promptExt = ( file ) => `concerning file ${path.basename(file)}${path.extname(file)} `
+  const promptExt = ( file ) => `concerning file ${path.basename(file)} `
 
   const file = ( filesToCommit.length === 1 ) ? promptExt(filesToCommit[0]): undefined;
 
@@ -186,12 +194,11 @@ const main = async () => {
   if( isCommit ) {
     await commitFiles( commitMessage, filesToCommit );
   }
-  
-  return commitMessage;
-  
-
+  else {
+    console.log( commitMessage );
+  }
 }
 
 main()
-  .then( result => console.log( 'done!' ))
+  .then( result => {/* do nothing */} )
   .catch( error => console.log( error))
