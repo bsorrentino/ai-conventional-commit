@@ -86,7 +86,7 @@ async function conventionalCommit(inputText, file) {
  *
  * @returns {Promise<string[]>} - A promise that resolves to an array of changed file names.
  */
-const getFilesUpdated = async () => {
+const getFilesToCommit = async () => {
 
   // const result = await $`git diff HEAD  --name-only`
   const result = await $`git diff --name-only --cached`
@@ -98,7 +98,67 @@ const getFilesUpdated = async () => {
 
 }
 
+/**
+ * @typedef {Object} CommitInfo
+ * @property {boolean} commit - Whether a commit should be made
+ * @property {string[]} files - Array of files to commit 
+*/
+/**
+ * Gets information about whether a commit should be made and which files to include.
+ * 
+ * Checks the command line arguments to determine if a commit is requested and which files to commit.
+ * 
+ * @returns {Promise<CommitInfo>} - Commit information
+ */
+const getCommitInfo = async () => { 
+  
+  if (!(argv.c || argv.commit)) {
+    return {
+      commit: false,
+      files: await getFilesToCommit()
+    }
+  }
+
+  if( argv.c && typeof(argv.c)==='string' )  {
+    return {
+      commit: true,
+      files: [argv.c]
+    }
+  }
+
+  if( argv.commit && typeof(argv.commit)==='string' )  {
+    return {
+      commit: true,
+      files: [argv.commit]
+    }
+  }
+
+  return {
+    commit: true,
+    files: await getFilesToCommit()
+  }
+
+}
+
+const commitFiles = async (commitMessage, files) => {
+
+  let args = [
+    '-m', `"${commitMessage}"`
+  ]
+
+  if( files.length === 1 ) {
+    args.push( files[0] )
+  }
+
+  // console.debug( `git commit ${args}`)
+
+  await $`git commit ${args}`
+
+}
+
 const main = async () => { 
+
+  // console.debug( argv );
 
   if( argv._.length === 0  ) throw "Please provide input text"
 
@@ -106,19 +166,32 @@ const main = async () => {
   
   $.verbose = false
 
-  const result = await getFilesUpdated()
+  const { commit:isCommit, files:filesToCommit }  = await getCommitInfo()
 
-  const file = ( result && result.length === 1 ) ? `concerning file ${result[0]} `:  undefined;
+  if( isCommit && filesToCommit.length === 0 ) {
+    console.warn(chalk.yellow('no file to commit!')); 
+    return
+  }
+
+  const promptExt = ( file ) => `concerning file ${path.basename(file)}${path.extname(file)} `
+
+  const file = ( filesToCommit.length === 1 ) ? promptExt(filesToCommit[0]): undefined;
 
   const commitMessage = await conventionalCommit(inputText, file );
 
   await clipboard.write( commitMessage )
 
+  $.verbose = true
+
+  if( isCommit ) {
+    await commitFiles( commitMessage, filesToCommit );
+  }
+  
   return commitMessage;
   
 
 }
 
 main()
-  .then( result => console.log( result ))
+  .then( result => console.log( 'done!' ))
   .catch( error => console.log( error))
