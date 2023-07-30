@@ -17,4 +17,5 @@ This simple utility make a commit description compliant witn [conventional commi
  --- | --- | ---
 | `add password hashing as auth` | `feat(auth): add password hashing` |
 | `update README.md`| `docs: update readme.md` | 
-| `update`| `docs(README.md): update` |README.md|
+| `update`| `docs(README.md): update` |README.md |
+| `add jsdoc from AI(cody) as docs` | `docs(index.mjs): add jsdoc from AI(cody)` | index.mjs
