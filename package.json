@@ -14,5 +14,8 @@
     "node-clipboardy": "^1.0.3",
     "openai": "^3.3.0",
     "zx": "^7.2.3"
+  },
+  "devDependencies": {
+    "aicommits": "^1.11.0"
   }
 }
