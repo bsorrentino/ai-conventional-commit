@@ -212,7 +212,10 @@ const main = async () => {
 
   const commitMessage = await conventionalCommit(inputText, file );
 
-  await clipboard.write( commitMessage )
+  // feature
+  if( argv.clipboard || argv.cp ) {
+    await clipboard.write( commitMessage )
+  }
 
   $.verbose = true
 
