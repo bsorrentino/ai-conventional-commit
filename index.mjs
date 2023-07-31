@@ -53,7 +53,7 @@ async function conventionalCommit(inputText, file) {
     translate text provided by developer using conventional commit format following rules below
     * if contains a file name use it as scope otherwise no scope is provided 
     * for each period add a newline into commit.
-    * if user put suffix "as <text>" the <text> must considered the commit's topic otherwise topic is "feat"
+    * if user put suffix "as <text>" the <text> must considered the commit's type otherwise type is "feat"
     * answer must contain only the commit text
     
     as developer: {file}{inputText}  
