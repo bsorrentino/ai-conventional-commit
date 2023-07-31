@@ -19,6 +19,7 @@ This simple utility make a commit description compliant witn [conventional commi
 | `update README.md`| `docs: update readme.md` | 
 | `update`| `docs(README.md): update` |README.md |
 | `add jsdoc from AI(cody) as docs` | `docs(index.mjs): add jsdoc from AI(cody)` | index.mjs
+| `add jsdoc from AI(cody) as docs` | `docs(index.mjs): add jsdoc from AI(cody)` | index.mjs
 
 
 [conventional commit]: https://www.conventionalcommits.org/en/v1.0.0/

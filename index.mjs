@@ -212,7 +212,7 @@ const main = async () => {
 
   const commitMessage = await conventionalCommit(inputText, file );
 
-  // feature
+  // fix
   if( argv.clipboard || argv.cp ) {
     await clipboard.write( commitMessage )
   }
