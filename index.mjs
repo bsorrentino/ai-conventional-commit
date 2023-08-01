@@ -5,6 +5,19 @@ import clipboard from 'node-clipboardy';
 
 import 'zx/globals'
 
+
+/**
+ * prompt for question that require Yes or No. default is Yes
+ * 
+ * @param   {string}  message  message to display
+ *
+ * @return   {Promise<boolean>}         return true or false 
+ */
+export const askYesOrNo = async ( message ) => {
+  const result = await question(`${message} (Y/n)? `)
+  return (result !== 'n' && result !== 'N') 
+} 
+
 /**
  * Creates and returns an OpenAI instance.
  *
@@ -44,25 +57,40 @@ const model = () => {
  * @throws {Error} - Throws any errors encountered while generating the commit message.
  */
 async function conventionalCommit(inputText, file) {
+
+  const fileRule = (file) ? `i have to commit file "${path.basename(file)}" ` : ''
+  // const fileRule = (file) ? `* add "${path.basename(file)}" as commit's scope if no scope provided` : ''
+
+
+  // * if commit file relate to documentation type is "docs"
+  // * if commit file relate to code type is "feat"
+  // * if commit file relate to configuration type is "build"
+  // * if type is specified by developer override previous rules
+
   try {
     // Use LangChain to generate a conventional commit message
 
     // Create a prompt with a placeholder for the commit message
     // The placeholder #~commit_message~# will be replaced with the actual commit message later
     const prompt = PromptTemplate.fromTemplate(`
-    translate text provided by developer using conventional commit format following rules below
-    * if contains a file name use it as scope otherwise no scope is provided 
+    translate text provided by developer using conventional commit format 
+    
+    <type>(<scope>): descriptions
+
+    <type> = feat | fix | docs | style | refactor | perf | test | chore | build
+
+    following rules below
+    * scope is optional but can be specified by developer using text "(<scope>)"
+    * type can be specified by developer using suffix "as <type>" or inferred based on file extension
     * for each period add a newline into commit.
-    * if user put suffix "as <text>" the <text> must considered the commit's type otherwise type is "feat"
     * answer must contain only the commit text
     
-    as developer: {file}{inputText}  
+    as developer {file} "{inputText}"  
   `);
-
 
   const promptVars = {
     inputText: inputText,
-    file: file ?? "" 
+    file: fileRule
   }
 
   if( argv.showPrompt ) {
@@ -166,12 +194,7 @@ const commitFiles = async (commitMessage, files) => {
     args.push( files[0] )
   }
 
-  if( argv.dryrun ) {
-    console.log( `git commit ${args.join(' ')}`)
-  }
-  else {
-    await $`git commit ${args}`
-  }
+  await $`git commit ${args}`
 
 }
 
@@ -206,9 +229,8 @@ const main = async () => {
     }
   }
 
-  const promptExt = ( file ) => `concerning file ${path.basename(file)} `
 
-  const file = ( filesToCommit.length === 1 ) ? promptExt(filesToCommit[0]): undefined;
+  const file = ( filesToCommit.length === 1 ) ? filesToCommit[0]: undefined;
 
   const commitMessage = await conventionalCommit(inputText, file );
 
@@ -216,11 +238,9 @@ const main = async () => {
 
   $.verbose = true
 
-  if( isCommit ) {
-    await commitFiles( commitMessage, filesToCommit );
-  }
-  else {
-    console.log( commitMessage );
+  console.log( commitMessage );
+  if( isCommit && await askYesOrNo( 'confirm commit') ) {
+      await commitFiles( commitMessage, filesToCommit );
   }
 }
 
